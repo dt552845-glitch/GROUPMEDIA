@@ -15,7 +15,7 @@ jobs:
 
       - name: Extract Project Files
         run: |
-          unzip -o "syncbeat (2).zip" -d . || unzip -o "syncbeat (1).zip" -d .
+          unzip -o "remix-syncbeat.zip" -d . || unzip -o "*.zip" -d .
 
       - name: Generate Missing Debug Keystore & .env
         run: |
@@ -31,10 +31,11 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
+      - name: Make Gradle Wrapper Executable
+        run: chmod +x gradlew || gradle wrapper
+
       - name: Build Debug APK
-        run: |
-          chmod +x gradlew || gradle wrapper
-          ./gradlew assembleDebug --no-daemon -Djava.awt.headless=true --stacktrace
+        run: ./gradlew assembleDebug --no-daemon -Djava.awt.headless=true --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
