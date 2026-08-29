@@ -25,10 +25,12 @@ jobs:
           channel: 'stable'
           flutter-version: '3.19.6'
 
-      - name: Recreate Android Project Configuration
+      - name: Recreate Android Project & Force MinSdk 21
         run: |
           rm -rf android
           flutter create . --org com.example --project-name syncbeat
+          sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 21/g' android/app/build.gradle || true
+          sed -i 's/minSdkVersion [0-9]*/minSdkVersion 21/g' android/app/build.gradle || true
 
       - name: Install Dependencies
         run: flutter pub get
