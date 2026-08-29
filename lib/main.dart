@@ -148,7 +148,7 @@ class _RoomScreenState extends State<RoomScreen> {
 
   void _initRoom() {
     _dbRef.child('rooms/$roomCode').set({
-      'videoId': 'jfKfPfyJRdk', // Default Lofi Girl stream
+      'videoId': 'jfKfPfyJRdk',
       'isPlaying': false,
       'position': 0,
     });
@@ -169,7 +169,7 @@ class _RoomScreenState extends State<RoomScreen> {
   void _listenToRoom() {
     _dbRef.child('rooms/$roomCode').onValue.listen((event) {
       if (_isDisposed) return;
-      final data = event.snapshot.value as Map?, dynamic>;
+      final data = event.snapshot.value as Map<dynamic, dynamic>?;
       if (data != null) {
         String videoId = data['videoId'] ?? 'jfKfPfyJRdk';
         bool isPlaying = data['isPlaying'] ?? false;
@@ -219,11 +219,6 @@ class _RoomScreenState extends State<RoomScreen> {
               YoutubePlayer(
                 controller: _controller!,
                 showVideoProgressIndicator: true,
-                onReady: () {
-                  if (widget.isHost) {
-                    _loadVideo('jfKfPfyJRdk');
-                  }
-                },
               )
             else
               const Center(child: CircularProgressIndicator()),
