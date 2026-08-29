@@ -25,8 +25,9 @@ jobs:
           channel: 'stable'
           flutter-version: '3.22.2'
 
-      - name: Recreate Android Project Files
+      - name: Clean & Recreate Android Project
         run: |
+          flutter clean
           flutter create . --org com.example --project-name syncbeat
           sed -i 's/minSdkVersion = flutter.minSdkVersion/minSdkVersion = 21/g' android/app/build.gradle || true
           sed -i 's/minSdkVersion [0-9]*/minSdkVersion 21/g' android/app/build.gradle || true
