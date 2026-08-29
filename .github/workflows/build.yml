@@ -35,7 +35,6 @@ jobs:
         run: |
           find ~/.pub-cache -name "build.gradle" -exec grep -l "flutter_inappwebview" {} \; | while read file; do
             if ! grep -q "namespace" "$file"; then
-              echo "Adding namespace to $file"
               sed -i '/android {/a \    namespace "com.pichillilorenzo.flutter_inappwebview"' "$file" || true
             fi
           done || true
@@ -44,7 +43,6 @@ jobs:
         run: |
           sed -i '/<manifest/a \    <uses-permission android:name="android.permission.INTERNET"\/>\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"\/>' android/app/src/main/AndroidManifest.xml
           if [ -f android/app/google-services.json ]; then
-            echo "Applying Google Services plugin..."
             sed -i '/dependencies {/a \        classpath "com.google.gms:google-services:4.4.2"' android/build.gradle
             echo 'apply plugin: "com.google.gms.google-services"' >> android/app/build.gradle
           fi
@@ -53,7 +51,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Release APK
-        run: flutter build apk --release --no-tree-shake-icons
+        run: flutter build apk --release --no-tree-shake-icons --no-shrink
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
