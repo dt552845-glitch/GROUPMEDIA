@@ -23,11 +23,10 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.22.2'
+          flutter-version: '3.27.1'
 
-      - name: Clean & Recreate Android Project
+      - name: Recreate Android Project Files
         run: |
-          flutter clean
           flutter create . --org com.example --project-name syncbeat
           sed -i 's/minSdkVersion = flutter.minSdkVersion/minSdkVersion = 21/g' android/app/build.gradle || true
           sed -i 's/minSdkVersion [0-9]*/minSdkVersion 21/g' android/app/build.gradle || true
