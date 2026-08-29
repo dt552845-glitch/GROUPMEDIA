@@ -23,7 +23,12 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.27.1'
+          flutter-version: '3.19.6'
+
+      - name: Recreate Android Project Configuration
+        run: |
+          rm -rf android
+          flutter create . --org com.example --project-name syncbeat
 
       - name: Install Dependencies
         run: flutter pub get
