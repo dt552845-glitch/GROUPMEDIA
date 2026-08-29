@@ -31,6 +31,15 @@ jobs:
           sed -i 's/minSdkVersion = flutter.minSdkVersion/minSdkVersion = 21/g' android/app/build.gradle || true
           sed -i 's/minSdkVersion [0-9]*/minSdkVersion 21/g' android/app/build.gradle || true
 
+      - name: Fix InAppWebView Namespace Issue
+        run: |
+          find ~/.pub-cache -name "build.gradle" -exec grep -l "flutter_inappwebview" {} \; | while read file; do
+            if ! grep -q "namespace" "$file"; then
+              echo "Adding namespace to $file"
+              sed -i '/android {/a \    namespace "com.pichillilorenzo.flutter_inappwebview"' "$file" || true
+            fi
+          done || true
+
       - name: Configure Android Permissions & Google Services
         run: |
           sed -i '/<manifest/a \    <uses-permission android:name="android.permission.INTERNET"\/>\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"\/>' android/app/src/main/AndroidManifest.xml
