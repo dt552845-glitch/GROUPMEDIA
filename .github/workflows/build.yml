@@ -23,7 +23,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.27.1'
+          flutter-version: '3.19.6'
 
       - name: Recreate Android Project Files
         run: |
@@ -31,18 +31,11 @@ jobs:
           sed -i 's/minSdkVersion = flutter.minSdkVersion/minSdkVersion = 21/g' android/app/build.gradle || true
           sed -i 's/minSdkVersion [0-9]*/minSdkVersion 21/g' android/app/build.gradle || true
 
-      - name: Fix InAppWebView Namespace Issue
-        run: |
-          find ~/.pub-cache -name "build.gradle" -exec grep -l "flutter_inappwebview" {} \; | while read file; do
-            if ! grep -q "namespace" "$file"; then
-              sed -i '/android {/a \    namespace "com.pichillilorenzo.flutter_inappwebview"' "$file" || true
-            fi
-          done || true
-
       - name: Configure Android Permissions & Google Services
         run: |
           sed -i '/<manifest/a \    <uses-permission android:name="android.permission.INTERNET"\/>\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"\/>' android/app/src/main/AndroidManifest.xml
           if [ -f android/app/google-services.json ]; then
+            echo "Applying Google Services plugin..."
             sed -i '/dependencies {/a \        classpath "com.google.gms:google-services:4.4.2"' android/build.gradle
             echo 'apply plugin: "com.google.gms.google-services"' >> android/app/build.gradle
           fi
@@ -51,7 +44,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Release APK
-        run: flutter build apk --release --no-tree-shake-icons --no-shrink
+        run: flutter build apk --release --no-tree-shake-icons
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
