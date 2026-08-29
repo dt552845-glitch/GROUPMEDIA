@@ -26,7 +26,19 @@ jobs:
           flutter-version: '3.22.2'
 
       - name: Recreate Android Project Files
-        run: flutter create . --org com.example --project-name syncbeat
+        run: |
+          flutter create . --org com.example --project-name syncbeat
+          sed -i 's/minSdkVersion = flutter.minSdkVersion/minSdkVersion = 21/g' android/app/build.gradle || true
+          sed -i 's/minSdkVersion [0-9]*/minSdkVersion 21/g' android/app/build.gradle || true
+
+      - name: Configure Android Permissions & Google Services
+        run: |
+          sed -i '/<manifest/a \    <uses-permission android:name="android.permission.INTERNET"\/>\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"\/>' android/app/src/main/AndroidManifest.xml
+          if [ -f android/app/google-services.json ]; then
+            echo "Applying Google Services plugin..."
+            sed -i '/dependencies {/a \        classpath "com.google.gms:google-services:4.4.2"' android/build.gradle
+            echo 'apply plugin: "com.google.gms.google-services"' >> android/app/build.gradle
+          fi
 
       - name: Install Dependencies
         run: flutter pub get
