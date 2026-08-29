@@ -19,11 +19,11 @@ jobs:
 
       - name: Configure Keystore & Environment
         run: |
-          # Generate debug keystore for Spotify SHA-1 compatibility
+          # Generate debug keystore for app signing and Spotify SHA-1 support
           keytool -genkeypair -v -keystore debug.keystore -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 -storepass android -keypass android -dname "CN=Android Debug,O=Android,C=US"
           touch .env
 
-          # Configure memory and compilation flags to prevent KSP crashes
+          # Configure JVM and in-process compilation settings to prevent KSP crashes
           echo "org.gradle.jvmargs=-Xmx4096m -Djava.awt.headless=true -Dfile.encoding=UTF-8" >> gradle.properties
           echo "kotlin.compiler.execution.strategy=in-process" >> gradle.properties
           echo "ksp.use.ksp2=false" >> gradle.properties
