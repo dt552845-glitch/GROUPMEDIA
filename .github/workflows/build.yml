@@ -22,8 +22,7 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
-          flutter-version: '3.22.6'
+          flutter-version: '3.24.0'
 
       - name: Recreate Android Project Files
         run: |
