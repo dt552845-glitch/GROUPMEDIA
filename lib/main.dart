@@ -257,6 +257,159 @@ class _RoomScreenState extends State<RoomScreen> {
                 }
               },
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+            child: const Text('Join'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class RoomScreen extends StatefulWidget {
+  final bool isHost;
+  final String? roomCode;
+
+  const RoomScreen({super.key, required this.isHost, this.roomCode});
+
+  @override
+  State<RoomScreen> createState() => _RoomScreenState();
+}
+
+class _RoomScreenState extends State<RoomScreen> {
+  late String roomCode;
+  YoutubePlayerController? _controller;
+  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
+  final TextEditingController _urlController = TextEditingController();
+  bool _isDisposed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    roomCode = widget.roomCode ?? (1000 + Random().nextInt(9000)).toString();
+    if (widget.isHost) {
+      _initRoom();
+    }
+    _listenToRoom();
+  }
+
+  void _initRoom() {
+    _dbRef.child('rooms/$roomCode').set({
+      'videoId': 'jfKfPfyJRdk',
+    });
+  }
+
+  void _initializePlayer(String videoId) {
+    if (_isDisposed) return;
+    if (_controller == null) {
+      _controller = YoutubePlayerController(
+        initialVideoId: videoId,
+        flags: const YoutubePlayerFlags(
+          autoPlay: true,
+          mute: false,
+          enableCaption: false,
+        ),
+      );
+      if (mounted) setState(() {});
+    } else {
+      if (_controller!.metadata.videoId != videoId) {
+        _controller!.load(videoId);
+      }
+    }
+  }
+
+  void _listenToRoom() {
+    _dbRef.child('rooms/$roomCode').onValue.listen((event) {
+      if (_isDisposed) return;
+      final data = event.snapshot.value as Map<dynamic, dynamic>?;
+      if (data != null && data['videoId'] != null) {
+        String videoId = data['videoId'];
+        _initializePlayer(videoId);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    _controller?.dispose();
+    _urlController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Room Code: $roomCode')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            if (_controller != null)
+              YoutubePlayerBuilder(
+                player: YoutubePlayer(
+                  controller: _controller!,
+                  showVideoProgressIndicator: true,
+                  progressIndicatorColor: Colors.redAccent,
+                ),
+                builder: (context, player) {
+                  return Column(
+                    children: [
+                      player,
+                      const SizedBox(height: 20),
+                    ],
+                  );
+                },
+              )
+            else
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 50),
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            const SizedBox(height: 20),
+            TextField(
+              controller: _urlController,
+              decoration: InputDecoration(
+                labelText: 'Paste YouTube URL here',
+                hintText: 'https://youtube.com/watch?v=...',
+                border: const OutlineInputBorder(),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () => _urlController.clear(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 15),
+            ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size.fromHeight(50),
+                backgroundColor: Colors.redAccent,
+              ),
+              icon: const Icon(Icons.play_arrow),
+              label: const Text('Play Song on All Devices', style: TextStyle(fontSize: 16)),
+              onPressed: () {
+                String? videoId = YoutubePlayer.convertUrlToId(_urlController.text);
+                if (videoId != null) {
+                  _dbRef.child('rooms/$roomCode').update({
+                    'videoId': videoId,
+                  });
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Song updated across all devices!')),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Invalid YouTube URL. Please check and try again.')),
+                  );
+                }
+              },
+            ),
             const SizedBox(height: 20),
             Card(
               color: Colors.grey[900],
